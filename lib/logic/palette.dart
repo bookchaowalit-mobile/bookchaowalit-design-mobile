@@ -95,6 +95,15 @@ double contrastRatio(Rgb a, Rgb b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+/// Formats a contrast ratio as `4.49:1`, truncating (never rounding up) so the
+/// label cannot show a passing threshold the ratio does not reach: 2.9998
+/// would round to `3.00` while [wcagRating] (correctly) says "Fail".
+String formatRatio(double ratio) {
+  // The epsilon keeps exact values such as 4.57 (456.9999... * 100) intact.
+  final truncated = (ratio * 100 + 1e-9).floor() / 100;
+  return '${truncated.toStringAsFixed(2)}:1';
+}
+
 /// WCAG rating for normal-size text.
 String wcagRating(double ratio) {
   if (ratio >= 7) return 'AAA';

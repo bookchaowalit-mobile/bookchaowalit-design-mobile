@@ -2,7 +2,7 @@
 
 ## Current state
 
-Score: 7/10 — core feature with tested pure-Dart logic, honest CI and fail-closed release signing; still no app icon or E2E flow.
+Score: 7.5/10 — palette/contrast tool with threshold-safe labels, broad edge-case tests, a11y guideline tests and fail-closed signing; no saved palettes, icon or E2E flow yet.
 
 ## Backlog
 
@@ -16,10 +16,16 @@ Score: 7/10 — core feature with tested pure-Dart logic, honest CI and fail-clo
 - Add a CI job that builds a signed release bundle from repository secrets (keystore decoded at runtime, never committed).
 
 ### P2
-- Tablet layout (NavigationRail) and 130% text-scale widget test.
+- Tablet layout (NavigationRail).
 - Localisation (Thai/English) for UI strings.
 
-## Done in this pass (pass 2)
+## Done in this pass (pass 3)
+
+- Bug fix: contrast ratios were shown with `toStringAsFixed(2)`, which rounds up, so e.g. `#003AFB` on black (2.998:1) displayed "3.00:1" next to a "Fail" rating (and 6.996:1 showed "7.00:1" with "AA"). New `formatRatio` truncates so the label never claims a threshold the rating denies.
+- Edge-case unit tests: near-threshold labels, inclusive rating boundaries, contrast symmetry/range over sampled colours, `bestTextOn` always reaching 4.5:1 over ~65k sampled colours, near-miss hex input (full-width, 8-digit, `0x`), white/black scales, `mix` endpoints.
+- Accessibility: decorative "Aa" preview excluded from semantics; swatch rows grow with text scale (min height 48). Widget tests: near-threshold label, 3-digit input full scale, a11y guidelines (tap target, labels, contrast), 200% text scale.
+
+## Done in pass 2
 
 - Release builds no longer sign with the debug key: `android/app/build.gradle.kts` reads the ignored `android/key.properties` and a Gradle guard fails any release assemble/bundle without it (pattern from `bookchaowalit-goal-tracker-mobile`). Root `.gitignore` also ignores `key.properties`, `*.jks`, `*.keystore`; README documents the setup. Not build-verified here (no Android SDK/Gradle in this environment).
 

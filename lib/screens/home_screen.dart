@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 8),
             for (final s in scaleFor(base))
               Container(
-                height: 48,
+                constraints: const BoxConstraints(minHeight: 48),
                 color: Color(s.color.argb),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 alignment: Alignment.centerLeft,
@@ -80,11 +80,13 @@ class _ContrastRow extends StatelessWidget {
     final ratio = contrastRatio(base, against);
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        backgroundColor: Color(base.argb),
-        child: Text('Aa', style: TextStyle(color: Color(against.argb))),
+      leading: ExcludeSemantics(
+        child: CircleAvatar(
+          backgroundColor: Color(base.argb),
+          child: Text('Aa', style: TextStyle(color: Color(against.argb))),
+        ),
       ),
-      title: Text('vs $name: ${ratio.toStringAsFixed(2)}:1'),
+      title: Text('vs $name: ${formatRatio(ratio)}'),
       subtitle: Text('Normal text: ${wcagRating(ratio)}'),
     );
   }

@@ -46,4 +46,78 @@ void main() {
     expect(bestTextOn(parseHex('#FFEB3B')!), Rgb.black);
     expect(bestTextOn(parseHex('#0D47A1')!), Rgb.white);
   });
+
+  group('edge cases (pass 3)', () {
+    test('ratio labels never round up across a WCAG threshold', () {
+      // 2.9982:1 used to display as "3.00:1" next to a "Fail" rating.
+      final nearThree = contrastRatio(parseHex('#003AFB')!, Rgb.black);
+      expect(nearThree, lessThan(3));
+      expect(wcagRating(nearThree), 'Fail');
+      expect(formatRatio(nearThree), '2.99:1');
+      final nearSeven = contrastRatio(parseHex('#004ED0')!, Rgb.white);
+      expect(wcagRating(nearSeven), 'AA');
+      expect(formatRatio(nearSeven), '6.99:1');
+      // Exact and binary-inexact values stay intact.
+      expect(formatRatio(21), '21.00:1');
+      expect(formatRatio(4.5), '4.50:1');
+      expect(formatRatio(4.57), '4.57:1');
+      expect(formatRatio(1), '1.00:1');
+    });
+
+    test('rating boundaries are inclusive', () {
+      expect(wcagRating(7), 'AAA');
+      expect(wcagRating(6.9999), 'AA');
+      expect(wcagRating(3), 'AA Large');
+      expect(wcagRating(2.9999), 'Fail');
+    });
+
+    test('contrast is symmetric and within 1..21', () {
+      for (var v = 0; v < 0x1000000; v += 0x0F1F2F) {
+        final c = Rgb((v >> 16) & 255, (v >> 8) & 255, v & 255);
+        final w = contrastRatio(c, Rgb.white);
+        expect(w, closeTo(contrastRatio(Rgb.white, c), 1e-12));
+        expect(w, inInclusiveRange(1, 21));
+      }
+    });
+
+    test('best text colour always reaches AA Large (and >= 4.5 in practice)',
+        () {
+      for (var v = 0; v < 0x1000000; v += 0x010307) {
+        final c = Rgb((v >> 16) & 255, (v >> 8) & 255, v & 255);
+        expect(contrastRatio(c, bestTextOn(c)), greaterThanOrEqualTo(4.5),
+            reason: c.hex);
+      }
+    });
+
+    test('parseHex rejects near-misses', () {
+      for (final bad in [
+        '#',
+        '##fff',
+        '#ffff',
+        '#12345678',
+        'fff ff',
+        '＃fff',
+        '#ｆｆｆ',
+        '0xFFFFFF'
+      ]) {
+        expect(parseHex(bad), isNull, reason: bad);
+      }
+      expect(parseHex('ABC'), const Rgb(0xAA, 0xBB, 0xCC));
+    });
+
+    test('scale of pure white and black stays in range', () {
+      final white = scaleFor(Rgb.white);
+      expect(white.take(5).every((s) => s.color == Rgb.white), isTrue);
+      expect(white.last.color, const Rgb(51, 51, 51));
+      final black = scaleFor(Rgb.black);
+      expect(black.first.color, const Rgb(204, 204, 204));
+      expect(black.skip(4).every((s) => s.color == Rgb.black), isTrue);
+    });
+
+    test('mix endpoints', () {
+      const c = Rgb(10, 20, 30);
+      expect(mix(c, Rgb.white, 0), c);
+      expect(mix(c, Rgb.white, 1), Rgb.white);
+    });
+  });
 }
