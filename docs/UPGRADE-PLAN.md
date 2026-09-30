@@ -24,6 +24,7 @@ Score: 7.5/10 — palette/contrast tool with threshold-safe labels, broad edge-c
 - Bug fix: contrast ratios were shown with `toStringAsFixed(2)`, which rounds up, so e.g. `#003AFB` on black (2.998:1) displayed "3.00:1" next to a "Fail" rating (and 6.996:1 showed "7.00:1" with "AA"). New `formatRatio` truncates so the label never claims a threshold the rating denies.
 - Edge-case unit tests: near-threshold labels, inclusive rating boundaries, contrast symmetry/range over sampled colours, `bestTextOn` always reaching 4.5:1 over ~65k sampled colours, near-miss hex input (full-width, 8-digit, `0x`), white/black scales, `mix` endpoints.
 - Accessibility: decorative "Aa" preview excluded from semantics; swatch rows grow with text scale (min height 48). Widget tests: near-threshold label, 3-digit input full scale, a11y guidelines (tap target, labels, contrast), 200% text scale.
+- The 200% text-scale widget test now runs at a 360 px phone width (it previously used the 800 px default test surface); no overflow found.
 
 ## Done in pass 2
 
